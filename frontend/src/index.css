@@ -1,0 +1,54 @@
+/* Urban Traffic Congestion - Design System */
+ :root {
+  /* Primary palette*/
+  --bg-primary: #f5ebe0;
+  --surface: #d5bdaf;
+  --text-primary: black;
+  --text-secondary: black;
+  --accent: #475569;
+  --accent-charcoal: #334155;
+
+  /* Status colors - muted */
+  --status-low: #6b9080;
+  --status-medium: #c9a227;
+  --status-high: #b56576;
+
+  /* Neutrals */
+  --border: rgba(0, 0, 0, 0.12);
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: 0.2s ease;
+
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+} 
+body {
+  margin: 0;
+  font-family: 'IBM Plex Serif', serif;
+  min-height: 100vh;
+  background-image: url('./bg.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+ 
+}
+
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
