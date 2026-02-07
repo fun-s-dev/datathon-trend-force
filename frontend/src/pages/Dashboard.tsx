@@ -20,6 +20,7 @@ export function Dashboard() {
   const [travelDay, setTravelDay] = useState("");
   const [travelHour, setTravelHour] = useState("");
   const [travelPeriod, setTravelPeriod] = useState("");
+  const [weather, setWeather] = useState("");
 
 
 
@@ -37,7 +38,13 @@ export function Dashboard() {
     setPrediction(null);
 
     try {
-      const data = await fetchPrediction(source, destination, travelDay);
+      // Convert 12h hour+period to 24h HH:00 string
+      let hour24 = parseInt(travelHour, 10) || 0;
+      if (travelPeriod === "pm" && hour24 !== 12) hour24 += 12;
+      if (travelPeriod === "am" && hour24 === 12) hour24 = 0;
+      const travelTime = `${String(hour24).padStart(2, "0")}:00`;
+
+      const data = await fetchPrediction(source, destination, travelDay, travelTime, weather);
       setPrediction(data);
 
       const routes = Array.isArray(data?.routes) ? data.routes : [];
@@ -131,7 +138,21 @@ export function Dashboard() {
     </select>
   </div>
 </div>
-
+        <div className="time-selector">
+          <label>Weather Condition</label>
+          <select
+            value={weather}
+            onChange={(e) => setWeather(e.target.value)}
+            disabled={state === "loading"}
+          >
+            <option value="">Select weather</option>
+            <option value="Clear">Clear</option>
+            <option value="Fog">Fog</option>
+            <option value="Rain">Rain</option>
+            <option value="Snow">Snow</option>
+            <option value="Extreme">Extreme</option>
+          </select>
+        </div>
 
         <button
           type="button"

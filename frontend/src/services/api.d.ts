@@ -1,11 +1,13 @@
-export const BASE_URL: string;
-export const PREDICTION_API: string;
-export const INCIDENT_API: string;
+export const BASE_URL: "http://localhost:8000";
+export const PREDICTION_API: "/predict-route";
+export const INCIDENT_API: "";
 
 export function fetchPrediction(
   source: string,
   destination: string,
-  timeOfTravel: string
+  travelDay: string,
+  travelTime: string,
+  weather: string
 ): Promise<Record<string, unknown>>;
 
 export function reportIncident(data: {

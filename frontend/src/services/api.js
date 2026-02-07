@@ -3,8 +3,8 @@
  * No hardcoded data. UI renders ONLY from backend responses.
  */
 
-export const BASE_URL = "";
-export const PREDICTION_API = "";
+export const BASE_URL = "http://localhost:8000";
+export const PREDICTION_API = "/predict-route";
 export const INCIDENT_API = "";
 
 function buildUrl(endpoint) {
@@ -19,7 +19,7 @@ function buildUrl(endpoint) {
  * Fetch prediction from ML model via backend.
  * Returns response or throws. No fallback values.
  */
-export async function fetchPrediction(source, destination, timeOfTravel) {
+export async function fetchPrediction(source, destination, travelDay, travelTime, weather) {
   const url = buildUrl(PREDICTION_API);
   if (!url) {
     throw new Error("API not configured");
@@ -27,10 +27,17 @@ export async function fetchPrediction(source, destination, timeOfTravel) {
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ source, destination, timeOfTravel }),
+    body: JSON.stringify({
+      source,
+      destination,
+      travel_day: travelDay,
+      travel_time: travelTime,
+      weather,
+    }),
   });
   if (!res.ok) {
-    throw new Error(res.statusText || "Prediction request failed");
+    const errorBody = await res.json().catch(() => null);
+    throw new Error(errorBody?.detail || res.statusText || "Prediction request failed");
   }
   const data = await res.json();
   return data;
