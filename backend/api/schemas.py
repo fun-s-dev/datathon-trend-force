@@ -52,3 +52,19 @@ class PredictionResponse(BaseModel):
     """Full JSON response returned by POST /predict-route."""
     routes: List[RouteResult]
     confidence: str                     # "Low", "Medium", or "High"
+
+
+# ── Incident ──────────────────────────────────────────────────────────────────
+
+class IncidentRequest(BaseModel):
+    """Payload the frontend sends to POST /report-incident."""
+    location: str = Field(..., min_length=1, description="Incident location")
+    type: str = Field(..., min_length=1, description="Incident type")
+    severity: str = Field(..., min_length=1, description="Severity level")
+    description: str = Field("", description="Optional description")
+
+
+class IncidentResponse(BaseModel):
+    """Response for POST /report-incident."""
+    status: str
+    message: str

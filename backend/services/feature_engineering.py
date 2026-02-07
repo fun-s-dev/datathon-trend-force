@@ -6,7 +6,7 @@ All transformations MUST match what was used at training time.
 import math
 from typing import Dict, List
 
-import numpy as np
+import pandas as pd
 from config.settings import DEFAULT_DENSITY, DEFAULT_LANES, DEFAULT_SIGNALS
 
 
@@ -33,9 +33,9 @@ def build_features(
     travel_time: str,
     travel_day: str,
     weather_severity: float,
-) -> np.ndarray:
+) -> pd.DataFrame:
     """
-    Build the feature matrix (n_routes × 9) for model inference.
+    Build the feature matrix as a pandas DataFrame for model inference.
 
     Feature order (must match training):
         0  distance_km
@@ -48,22 +48,38 @@ def build_features(
         7  default_lanes
         8  default_signals
     """
+    # Define the exact feature names expected by the model
+    FEATURE_NAMES = [
+        "distance_km",
+        "base_duration_min", 
+        "hour_sin",
+        "hour_cos",
+        "is_weekend",
+        "weather_severity",
+        "default_density",
+        "default_lanes", 
+        "default_signals"
+    ]
+    
     hour = _parse_hour(travel_time)
     h_sin, h_cos = _cyclic_hour(hour)
     weekend = _is_weekend(travel_day)
 
+    # Build rows as dictionaries with explicit column names
     rows = []
     for r in routes:
-        rows.append([
-            r["distance_km"],
-            r["base_duration_min"],
-            h_sin,
-            h_cos,
-            weekend,
-            weather_severity,
-            DEFAULT_DENSITY,
-            DEFAULT_LANES,
-            DEFAULT_SIGNALS,
-        ])
+        feature_row = {
+            "distance_km": r["distance_km"],
+            "base_duration_min": r["base_duration_min"],
+            "hour_sin": h_sin,
+            "hour_cos": h_cos,
+            "is_weekend": weekend,
+            "weather_severity": weather_severity,
+            "default_density": DEFAULT_DENSITY,
+            "default_lanes": DEFAULT_LANES,
+            "default_signals": DEFAULT_SIGNALS,
+        }
+        rows.append(feature_row)
 
-    return np.array(rows, dtype=np.float64)
+    # Create DataFrame with explicit column order
+    return pd.DataFrame(rows, columns=FEATURE_NAMES)

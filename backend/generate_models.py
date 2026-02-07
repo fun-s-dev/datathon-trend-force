@@ -59,6 +59,19 @@ print(f"[OK] Weather encoder saved → {encoder_path}")
 #
 # Target: delay_minutes (non-negative)
 
+# Define explicit feature names to match what the backend expects
+FEATURE_NAMES = [
+    "distance_km",
+    "base_duration_min", 
+    "hour_sin",
+    "hour_cos",
+    "is_weekend",
+    "weather_severity",
+    "default_density",
+    "default_lanes", 
+    "default_signals"
+]
+
 rng = np.random.RandomState(42)
 n_samples = 2000
 
@@ -98,8 +111,12 @@ model = GradientBoostingRegressor(
 )
 model.fit(X, y)
 
+# ⭐ CRITICAL: Manually set feature names so model.feature_names_in_ works
+model.feature_names_in_ = np.array(FEATURE_NAMES)
+
 model_path = os.path.join(MODEL_DIR, "traffic_ranking_model.pkl")
 joblib.dump(model, model_path)
 print(f"[OK] Traffic model saved  → {model_path}")
+print(f"[INFO] Model feature names: {model.feature_names_in_}")
 print("\nDone. You can now start the backend with:")
 print("  uvicorn main:app --reload")

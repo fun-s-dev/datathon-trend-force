@@ -8,6 +8,7 @@ from typing import List
 
 import joblib
 import numpy as np
+import pandas as pd
 from fastapi import HTTPException
 
 from config.settings import TRAFFIC_MODEL_PATH, WEATHER_ENCODER_PATH
@@ -95,12 +96,17 @@ def encode_weather(weather: str) -> float:
     )
 
 
-def predict_delay(features: np.ndarray) -> List[float]:
+def predict_delay(features: pd.DataFrame) -> List[float]:
     """
-    Run the traffic model on the feature matrix and return
+    Run the traffic model on the feature DataFrame and return
     predicted delay_minutes for each route.
     """
     model = _load_traffic_model()
+    
+    # Ensure column order matches model expectations
+    if hasattr(model, 'feature_names_in_'):
+        features = features[model.feature_names_in_]
+    
     try:
         preds = model.predict(features)
         # Ensure non-negative delays

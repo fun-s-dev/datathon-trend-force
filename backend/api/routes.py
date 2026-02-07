@@ -4,7 +4,7 @@ Uses Photon (geocoding) + OSRM (routing) — fully free, no API keys.
 """
 
 from fastapi import APIRouter, HTTPException
-from api.schemas import PredictionRequest, PredictionResponse, RouteResult
+from api.schemas import PredictionRequest, PredictionResponse, RouteResult, IncidentRequest, IncidentResponse
 from services.geocoding_service import geocode
 from services.routing_service import fetch_routes
 from services.feature_engineering import build_features
@@ -135,3 +135,19 @@ async def predict_route(payload: PredictionRequest):
     )
 
     return PredictionResponse(routes=route_results, confidence=overall_confidence)
+
+
+@router.post("/report-incident", response_model=IncidentResponse)
+async def report_incident(payload: IncidentRequest):
+    """
+    Accept an incident report from the frontend.
+    Currently logs and acknowledges — extend with DB persistence as needed.
+    """
+    print(
+        f"[INCIDENT] location={payload.location} type={payload.type} "
+        f"severity={payload.severity} desc={payload.description!r}"
+    )
+    return IncidentResponse(
+        status="ok",
+        message=f"Incident at '{payload.location}' recorded successfully.",
+    )

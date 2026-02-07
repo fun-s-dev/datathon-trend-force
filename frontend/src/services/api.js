@@ -5,7 +5,7 @@
 
 export const BASE_URL = "http://localhost:8000";
 export const PREDICTION_API = "/predict-route";
-export const INCIDENT_API = "";
+export const INCIDENT_API = "/report-incident";
 
 function buildUrl(endpoint) {
   const base = String(BASE_URL || "").replace(/\/$/, "");
