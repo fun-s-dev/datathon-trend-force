@@ -1,43 +1,42 @@
-/* Urban Traffic Congestion - Design System */
- :root {
-  /* Primary palette*/
-  --bg-primary: #f5ebe0;
-  --surface: #d5bdaf;
-  --text-primary: black;
-  --text-secondary: black;
-  --accent: #475569;
-  --accent-charcoal: #334155;
+/* Urban Traffic Congestion - Smart Signal Dashboard Design System */
+:root {
+  /* Primary palette — dark asphalt theme */
+  --bg-primary: #0f1117;
+  --bg-secondary: #171b26;
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-glass: rgba(255, 255, 255, 0.08);
+  --text-primary: #eaf0f6;
+  --text-secondary: #8892a4;
+  --accent: #3b82f6;
+  --accent-charcoal: #60a5fa;
 
-  /* Status colors - muted */
-  --status-low: #6b9080;
-  --status-medium: #c9a227;
-  --status-high: #b56576;
+  /* Semantic status colors — traffic signal */
+  --status-low: #22c55e;
+  --status-low-bg: rgba(34, 197, 94, 0.12);
+  --status-medium: #eab308;
+  --status-medium-bg: rgba(234, 179, 8, 0.12);
+  --status-high: #ef4444;
+  --status-high-bg: rgba(239, 68, 68, 0.12);
 
   /* Neutrals */
-  --border: rgba(0, 0, 0, 0.12);
-  --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --transition: 0.2s ease;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(59, 130, 246, 0.5);
+  --shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.25);
+  --shadow-glow-green: 0 0 20px rgba(34, 197, 94, 0.25);
+  --shadow-glow-red: 0 0 20px rgba(239, 68, 68, 0.2);
+  --shadow-glow-yellow: 0 0 20px rgba(234, 179, 8, 0.2);
+  --shadow-glow-accent: 0 0 24px rgba(59, 130, 246, 0.3);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color: var(--text-primary);
   background-color: var(--bg-primary);
-} 
-body {
-  margin: 0;
-  font-family: 'IBM Plex Serif', serif;
-  min-height: 100vh;
-  background-image: url('./grey_bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
- 
 }
-
 
 * {
   box-sizing: border-box;
@@ -46,9 +45,64 @@ body {
 }
 
 body {
+  margin: 0;
+  font-family: 'IBM Plex Serif', serif;
   min-height: 100vh;
+  background: var(--bg-primary);
 }
 
 #root {
   min-height: 100vh;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Keyframe animations */
+@keyframes pulse-glow-green {
+  0%, 100% { box-shadow: 0 0 8px rgba(34, 197, 94, 0.15); }
+  50% { box-shadow: 0 0 24px rgba(34, 197, 94, 0.35); }
+}
+
+@keyframes pulse-glow-accent {
+  0%, 100% { box-shadow: 0 0 4px rgba(59, 130, 246, 0.1); }
+  50% { box-shadow: 0 0 16px rgba(59, 130, 246, 0.25); }
+}
+
+@keyframes shake-once {
+  0% { transform: translateX(0); }
+  15% { transform: translateX(-4px); }
+  30% { transform: translateX(4px); }
+  45% { transform: translateX(-3px); }
+  60% { transform: translateX(3px); }
+  75% { transform: translateX(-1px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes traffic-light-cycle {
+  0%, 33% { background: var(--status-high); box-shadow: 0 0 20px rgba(239,68,68,0.5); }
+  34%, 66% { background: var(--status-medium); box-shadow: 0 0 20px rgba(234,179,8,0.5); }
+  67%, 100% { background: var(--status-low); box-shadow: 0 0 20px rgba(34,197,94,0.5); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes count-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }

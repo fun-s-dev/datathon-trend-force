@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { AnalyticsPanel } from "../components/AnalyticsPanel";
 import { MetricCard } from "../components/MetricCard";
 import { StatusBadge } from "../components/StatusBadge";
@@ -14,6 +15,16 @@ export interface CityPlannerDashboardProps {
   travelDay?: string;
 }
 
+const stagger = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 18 } },
+};
+
 export function CityPlannerDashboard({
   prediction,
   congestionLevel,
@@ -27,43 +38,55 @@ export function CityPlannerDashboard({
   const dayType = isWeekend ? "Weekend" : "Weekday";
 
   return (
-    <div className="dashboard-view planner-dashboard">
+    <motion.div
+      className="dashboard-view planner-dashboard"
+      variants={stagger}
+      initial="hidden"
+      animate="visible"
+    >
       {FEATURE_FLAGS.SHOW_ANALYTICS && (
-        <AnalyticsPanel prediction={prediction} mode="planner" />
+        <motion.div variants={fadeUp}>
+          <AnalyticsPanel prediction={prediction} mode="planner" />
+        </motion.div>
       )}
 
-      <div className="context-row card">
+      <motion.div className="context-row card" variants={fadeUp}>
         <h3>{UI_LABELS.CONTEXT}</h3>
         <div className="context-items">
           <MetricCard label={UI_LABELS.WEEKEND_WEEKDAY} value={dayType} />
           {peakHourFlag && (
-            <MetricCard
-              label={UI_LABELS.PEAK_HOUR}
-              value="Yes"
-            />
+            <MetricCard label={UI_LABELS.PEAK_HOUR} value="Yes" accentColor="var(--status-medium)" />
           )}
           {weatherImpactNote != null && (
-            <div className="metric-card-inline">
+            <motion.div
+              className="metric-card-inline"
+              whileHover={{ y: -2 }}
+            >
               <span className="metric-label">{UI_LABELS.WEATHER_IMPACT}</span>
               <span className="metric-value-small">{weatherImpactNote}</span>
-            </div>
+            </motion.div>
           )}
         </div>
-      </div>
+      </motion.div>
 
-      <div className="metrics-grid">
+      <motion.div className="metrics-grid" variants={fadeUp}>
         {congestionLevel != null && (
-          <div className="card metric-card-inline">
+          <motion.div
+            className="card metric-card-inline"
+            whileHover={{ y: -2, boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}
+          >
             <span className="metric-label">{UI_LABELS.CONGESTION_LEVEL}</span>
             <StatusBadge level={congestionLevel} />
-          </div>
+          </motion.div>
         )}
         {riskScore != null && (
           <MetricCard label={UI_LABELS.RISK_SCORE} value={`${riskScore}%`} />
         )}
-      </div>
+      </motion.div>
 
-      <PlaceholderSection />
-    </div>
+      <motion.div variants={fadeUp}>
+        <PlaceholderSection />
+      </motion.div>
+    </motion.div>
   );
 }

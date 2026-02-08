@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { FEATURE_FLAGS, ALERT_THRESHOLDS, UI_LABELS } from "../config/constants";
 
 export interface AlertBannerProps {
@@ -13,8 +14,20 @@ export function AlertBanner({ riskScore, risk }: AlertBannerProps) {
   if (!isHighRisk) return null;
 
   return (
-    <div className="alert-banner card alert-high">
-      <span className="alert-banner-message">{UI_LABELS.ALERT_HIGH_RISK}</span>
-    </div>
+    <motion.div
+      className="alert-banner card alert-high"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ type: "spring", stiffness: 120, damping: 16 }}
+    >
+      <motion.span
+        className="alert-banner-message"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        {UI_LABELS.ALERT_HIGH_RISK}
+      </motion.span>
+    </motion.div>
   );
 }

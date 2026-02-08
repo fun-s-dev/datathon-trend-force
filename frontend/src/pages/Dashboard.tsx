@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchPrediction } from "../services/api";
 import { LoaderSkeleton } from "../components/LoaderSkeleton";
@@ -14,6 +13,36 @@ type ViewState = "idle" | "loading" | "success" | "empty" | "error";
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
 
+/* ─── animation variants ─── */
+const formVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 80, damping: 20, staggerChildren: 0.06 },
+  },
+};
+
+const fieldVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 18 } },
+};
+
+const resultVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 70, damping: 20, delay: 0.05 },
+  },
+  exit: { opacity: 0, y: 20, transition: { duration: 0.2 } },
+};
+
+const idleVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 80, damping: 18 } },
+  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
+};
 
 export function Dashboard() {
   const [source, setSource] = useState("");
@@ -77,10 +106,17 @@ export function Dashboard() {
 
   return (
     <div className="page dashboard">
-      <section className="section-input card input-section-scrollable">
-        <h2>Route Prediction</h2>
-        <div className="input-grid">
-          <div className="input-group">
+      {/* ─── INPUT FORM ─── */}
+      <motion.section
+        className="section-input card input-section-scrollable"
+        variants={formVariants}
+        initial="hidden"
+        animate="visible"
+        layout
+      >
+        <motion.h2 variants={fieldVariants}>Route Prediction</motion.h2>
+        <motion.div className="input-grid" variants={formVariants}>
+          <motion.div className="input-group" variants={fieldVariants}>
             <label>{UI_LABELS.SOURCE}</label>
             <input
               type="text"
@@ -89,8 +125,8 @@ export function Dashboard() {
               onChange={(e) => setSource(e.target.value)}
               disabled={state === "loading"}
             />
-          </div>
-          <div className="input-group">
+          </motion.div>
+          <motion.div className="input-group" variants={fieldVariants}>
             <label>{UI_LABELS.DESTINATION}</label>
             <input
               type="text"
@@ -99,8 +135,8 @@ export function Dashboard() {
               onChange={(e) => setDestination(e.target.value)}
               disabled={state === "loading"}
             />
-          </div>
-          <div className="input-row-inline">
+          </motion.div>
+          <motion.div className="input-row-inline" variants={fieldVariants}>
             <div className="time-selector">
               <label>{UI_LABELS.TRAVEL_DAY}</label>
               <select
@@ -157,9 +193,9 @@ export function Dashboard() {
                 <option value="Extreme">Extreme</option>
               </select>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="advanced-toggle">
+          <motion.div className="advanced-toggle" variants={fieldVariants}>
             <button
               type="button"
               className="advanced-btn"
@@ -167,46 +203,74 @@ export function Dashboard() {
             >
               {showAdvanced ? "−" : "+"} {UI_LABELS.ADVANCED_OPTIONS}
             </button>
-          </div>
-          {showAdvanced && (
-            <div className="advanced-section">
-              <div className="input-group">
-                <label>{UI_LABELS.URGENCY_LEVEL}</label>
-                <select
-                  value={urgencyLevel}
-                  onChange={(e) => setUrgencyLevel(e.target.value)}
-                  disabled={state === "loading"}
-                >
-                  <option value="">{UI_LABELS.PLACEHOLDER_URGENCY_DEFAULT}</option>
-                  <option value="low">Low</option>
-                  <option value="normal">Normal</option>
-                  <option value="high">High</option>
-                </select>
-              </div>
-            </div>
-          )}
-        </div>
+          </motion.div>
 
-        <button
+          <AnimatePresence>
+            {showAdvanced && (
+              <motion.div
+                className="advanced-section"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ type: "spring", stiffness: 200, damping: 24 }}
+              >
+                <div className="input-group">
+                  <label>{UI_LABELS.URGENCY_LEVEL}</label>
+                  <select
+                    value={urgencyLevel}
+                    onChange={(e) => setUrgencyLevel(e.target.value)}
+                    disabled={state === "loading"}
+                  >
+                    <option value="">{UI_LABELS.PLACEHOLDER_URGENCY_DEFAULT}</option>
+                    <option value="low">Low</option>
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        <motion.button
           type="button"
           className="predict-btn"
           onClick={handleSubmit}
           disabled={state === "loading"}
+          variants={fieldVariants}
+          whileHover={state !== "loading" ? { scale: 1.05, boxShadow: "0 0 28px rgba(59,130,246,0.4)" } : {}}
+          whileTap={state !== "loading" ? { scale: 0.95 } : {}}
         >
           {state === "loading" ? "Predicting…" : "Predict"}
-        </button>
-      </section>
+        </motion.button>
+      </motion.section>
 
+      {/* ─── STATE SECTIONS ─── */}
       <AnimatePresence mode="wait">
         {state === "idle" && (
           <motion.section
             key="idle"
             className="section-idle card"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            variants={idleVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
           >
-            <p className="idle-message">{UI_LABELS.IDLE_MESSAGE}</p>
+            <div className="idle-placeholder">
+              <div className="idle-signal">
+                <div className="idle-signal-dot" />
+                <div className="idle-signal-dot" />
+                <div className="idle-signal-dot" />
+              </div>
+              <motion.p
+                className="idle-message"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                {UI_LABELS.IDLE_MESSAGE}
+              </motion.p>
+            </div>
           </motion.section>
         )}
 
@@ -214,9 +278,10 @@ export function Dashboard() {
           <motion.section
             key="loading"
             className="section-loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 100, damping: 18 }}
           >
             <LoaderSkeleton />
           </motion.section>
@@ -226,9 +291,10 @@ export function Dashboard() {
           <motion.section
             key="empty"
             className="section-empty card"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ type: "spring", stiffness: 100, damping: 18 }}
           >
             <p className="empty-message">{UI_LABELS.EMPTY_MESSAGE}</p>
           </motion.section>
@@ -238,9 +304,10 @@ export function Dashboard() {
           <motion.section
             key="error"
             className="section-error"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ type: "spring", stiffness: 120, damping: 18 }}
           >
             <ErrorState message={error ?? undefined} onRetry={handleSubmit} />
           </motion.section>
@@ -250,64 +317,94 @@ export function Dashboard() {
           <motion.section
             key="success"
             className="section-results"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            variants={resultVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            layout
           >
-            <div className="dashboard-selector">
+            <motion.div
+              className="dashboard-selector"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 120, damping: 18 }}
+            >
               {DASHBOARD_CONFIG.ENABLED_VIEWS.map((view) => (
-                <button
+                <motion.button
                   key={view}
                   type="button"
                   className={`dashboard-tab ${activeView === view ? "active" : ""}`}
                   onClick={() => setActiveView(view)}
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  layout
                 >
                   {DASHBOARD_CONFIG.VIEW_LABELS[view] ?? view}
-                </button>
+                </motion.button>
               ))}
-            </div>
+            </motion.div>
 
-            {activeView === "navigation" && (
-              <NavigationDashboard
-                routes={routes}
-                prediction={prediction ?? {}}
-                congestionLevel={congestionLevel}
-                riskScore={riskScore}
-                peakHourFlag={peakHourFlag}
-                weatherImpactNote={weatherImpactNote}
-              />
-            )}
-            {activeView === "planner" && (
-              <CityPlannerDashboard
-                routes={routes}
-                prediction={prediction ?? {}}
-                congestionLevel={congestionLevel}
-                riskScore={riskScore}
-                peakHourFlag={peakHourFlag}
-                weatherImpactNote={weatherImpactNote}
-                travelDay={travelDay}
-              />
-            )}
-            {activeView === "operator" && (
-              <TrafficOperatorDashboard
-                routes={routes}
-                prediction={prediction ?? {}}
-                congestionLevel={congestionLevel}
-                riskScore={riskScore}
-                peakHourFlag={peakHourFlag}
-                weatherImpactNote={weatherImpactNote}
-                travelDay={travelDay}
-              />
-            )}
+            <AnimatePresence mode="wait">
+              {activeView === "navigation" && (
+                <motion.div
+                  key="nav"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -16 }}
+                  transition={{ type: "spring", stiffness: 100, damping: 18 }}
+                >
+                  <NavigationDashboard
+                    routes={routes}
+                    prediction={prediction ?? {}}
+                    congestionLevel={congestionLevel}
+                    riskScore={riskScore}
+                    peakHourFlag={peakHourFlag}
+                    weatherImpactNote={weatherImpactNote}
+                  />
+                </motion.div>
+              )}
+              {activeView === "planner" && (
+                <motion.div
+                  key="planner"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -16 }}
+                  transition={{ type: "spring", stiffness: 100, damping: 18 }}
+                >
+                  <CityPlannerDashboard
+                    routes={routes}
+                    prediction={prediction ?? {}}
+                    congestionLevel={congestionLevel}
+                    riskScore={riskScore}
+                    peakHourFlag={peakHourFlag}
+                    weatherImpactNote={weatherImpactNote}
+                    travelDay={travelDay}
+                  />
+                </motion.div>
+              )}
+              {activeView === "operator" && (
+                <motion.div
+                  key="operator"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -16 }}
+                  transition={{ type: "spring", stiffness: 100, damping: 18 }}
+                >
+                  <TrafficOperatorDashboard
+                    routes={routes}
+                    prediction={prediction ?? {}}
+                    congestionLevel={congestionLevel}
+                    riskScore={riskScore}
+                    peakHourFlag={peakHourFlag}
+                    weatherImpactNote={weatherImpactNote}
+                    travelDay={travelDay}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.section>
         )}
       </AnimatePresence>
-
-      <nav className="page-nav">
-        <Link to="/report-incident" className="nav-link">
-          Report Incident
-        </Link>
-      </nav>
     </div>
   );
 }

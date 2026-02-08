@@ -1,0 +1,37 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+*.egg
+.eggs/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+*.dll
+*.exe
+*.so
+*.dylib
+
+# Models (regenerated via generate_models.py)
+backend/models/*.pkl

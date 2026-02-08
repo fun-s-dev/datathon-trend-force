@@ -1,11 +1,26 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { reportIncident, BASE_URL, INCIDENT_API } from "../services/api";
 
 const INCIDENT_TYPES = ["Accident", "Road Work", "Event", "Weather", "Other"];
 const SEVERITY_OPTIONS = ["Low", "Medium", "High"];
 
 type SubmitState = "idle" | "loading" | "success" | "error";
+
+const formVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 80, damping: 18, staggerChildren: 0.06 },
+  },
+};
+
+const fieldVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 18 } },
+};
 
 export function IncidentReport() {
   const [location, setLocation] = useState("");
@@ -48,10 +63,15 @@ export function IncidentReport() {
 
   return (
     <div className="page incident-report">
-      <section className="card incident-form-section">
-        <h2>Report Incident</h2>
+      <motion.section
+        className="card incident-form-section"
+        variants={formVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.h2 variants={fieldVariants}>Report Incident</motion.h2>
         <form onSubmit={handleSubmit} className="incident-form">
-          <div className="form-group">
+          <motion.div className="form-group" variants={fieldVariants}>
             <label>Location</label>
             <input
               type="text"
@@ -61,8 +81,8 @@ export function IncidentReport() {
               disabled={state === "loading"}
               required
             />
-          </div>
-          <div className="form-group">
+          </motion.div>
+          <motion.div className="form-group" variants={fieldVariants}>
             <label>Incident type</label>
             <select
               value={incidentType}
@@ -75,8 +95,8 @@ export function IncidentReport() {
                 <option key={t} value={t}>{t}</option>
               ))}
             </select>
-          </div>
-          <div className="form-group">
+          </motion.div>
+          <motion.div className="form-group" variants={fieldVariants}>
             <label>Severity</label>
             <select
               value={severity}
@@ -89,8 +109,8 @@ export function IncidentReport() {
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
-          </div>
-          <div className="form-group">
+          </motion.div>
+          <motion.div className="form-group" variants={fieldVariants}>
             <label>Description (optional)</label>
             <textarea
               placeholder="Brief description"
@@ -99,28 +119,54 @@ export function IncidentReport() {
               disabled={state === "loading"}
               rows={3}
             />
-          </div>
+          </motion.div>
 
-          {state === "success" && (
-            <p className="form-success">Incident reported successfully. Backend will update predictions.</p>
-          )}
-          {state === "error" && error && (
-            <p className="form-error">{error}</p>
-          )}
+          <AnimatePresence>
+            {state === "success" && (
+              <motion.p
+                className="form-success"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ type: "spring", stiffness: 120, damping: 18 }}
+              >
+                Incident reported successfully. Backend will update predictions.
+              </motion.p>
+            )}
+            {state === "error" && error && (
+              <motion.p
+                className="form-error"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ type: "spring", stiffness: 120, damping: 18 }}
+              >
+                {error}
+              </motion.p>
+            )}
+          </AnimatePresence>
 
-          <button
+          <motion.button
             type="submit"
             className="submit-btn"
             disabled={state === "loading"}
+            variants={fieldVariants}
+            whileHover={state !== "loading" ? { scale: 1.04, boxShadow: "0 0 24px rgba(59,130,246,0.35)" } : {}}
+            whileTap={state !== "loading" ? { scale: 0.96 } : {}}
           >
             {state === "loading" ? "Submitting…" : "Submit"}
-          </button>
+          </motion.button>
         </form>
-      </section>
+      </motion.section>
 
-      <nav className="page-nav">
+      <motion.nav
+        className="page-nav"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+      >
         <Link to="/" className="nav-link">← Back to Dashboard</Link>
-      </nav>
+      </motion.nav>
     </div>
   );
 }

@@ -22,6 +22,19 @@ export interface NavigationDashboardProps {
   weatherImpactNote?: string;
 }
 
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+  },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 18 } },
+};
+
 export function NavigationDashboard({
   routes,
   prediction,
@@ -44,33 +57,42 @@ export function NavigationDashboard({
   const rec = navSummary.recommended_route;
 
   return (
-    <div className="dashboard-view navigation-dashboard">
+    <motion.div
+      className="dashboard-view navigation-dashboard"
+      variants={staggerContainer}
+      initial="hidden"
+      animate="visible"
+    >
       {FEATURE_FLAGS.SHOW_ANALYTICS && (
-        <AnalyticsPanel prediction={prediction} mode="navigation" />
+        <motion.div variants={fadeUp}>
+          <AnalyticsPanel prediction={prediction} mode="navigation" />
+        </motion.div>
       )}
       {FEATURE_FLAGS.SHOW_JOURNEY_SUMMARY && rec != null && (
-        <JourneySummary
-          routeName={rec.name}
-          totalTime={rec.predicted_time_min}
-          delay={rec.predicted_delay_min}
-          distance={rec.distance_km}
-          risk={rec.risk}
-        />
+        <motion.div variants={fadeUp}>
+          <JourneySummary
+            routeName={rec.name}
+            totalTime={rec.predicted_time_min}
+            delay={rec.predicted_delay_min}
+            distance={rec.distance_km}
+            risk={rec.risk}
+          />
+        </motion.div>
       )}
 
       {routes.length > 0 && (
         showMap ? (
-          <motion.div key="map" className="map-section card">
+          <motion.div key="map" className="map-section card" variants={fadeUp}>
             <h3>{UI_LABELS.MAP}</h3>
             <RouteMap routes={routes} recommendedIndex={0} />
           </motion.div>
         ) : isSingleRoute ? (
-          <motion.div key="map-fallback" className="map-section card">
+          <motion.div key="map-fallback" className="map-section card" variants={fadeUp}>
             <h3>{UI_LABELS.MAP}</h3>
             <p className="map-fallback">{MAP_NO_GEOMETRY_MESSAGE}</p>
           </motion.div>
         ) : (
-          <motion.div key="alternatives" className="alternatives-section card">
+          <motion.div key="alternatives" className="alternatives-section card" variants={fadeUp}>
             <h3>{UI_LABELS.ROUTE_ALTERNATIVES}</h3>
             <p className="alternatives-message">{MAP_MULTI_ROUTE_ALTERNATIVES_MESSAGE}</p>
           </motion.div>
@@ -78,22 +100,25 @@ export function NavigationDashboard({
       )}
 
       {routes.length > 0 && (
-        <div className="routes-section">
+        <motion.div className="routes-section" variants={fadeUp}>
           <h3>{UI_LABELS.ROUTES}</h3>
           <div className="route-cards">
             {routes.map((route: Record<string, unknown>, i: number) => (
-              <RouteCard key={String(route?.rank ?? route?.id ?? i)} route={route} />
+              <RouteCard key={String(route?.rank ?? route?.id ?? i)} route={route} index={i} />
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
-      <div className="metrics-grid">
+      <motion.div className="metrics-grid" variants={fadeUp}>
         {congestionLevel != null && (
-          <div className="card metric-card-inline">
+          <motion.div
+            className="card metric-card-inline"
+            whileHover={{ y: -2, boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}
+          >
             <span className="metric-label">{UI_LABELS.CONGESTION_LEVEL}</span>
             <StatusBadge level={congestionLevel} />
-          </div>
+          </motion.div>
         )}
         {riskScore != null && (
           <MetricCard label={UI_LABELS.RISK_SCORE} value={`${riskScore}%`} />
@@ -102,15 +127,19 @@ export function NavigationDashboard({
           <MetricCard
             label={UI_LABELS.PEAK_HOUR}
             value="Yes"
+            accentColor="var(--status-medium)"
           />
         )}
         {weatherImpactNote != null && (
-          <div className="card metric-card-inline weather-impact">
+          <motion.div
+            className="card metric-card-inline weather-impact"
+            whileHover={{ y: -2, boxShadow: "0 8px 24px rgba(0,0,0,0.2)" }}
+          >
             <span className="metric-label">{UI_LABELS.WEATHER_IMPACT}</span>
             <span className="metric-value-small">{weatherImpactNote}</span>
-          </div>
+          </motion.div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

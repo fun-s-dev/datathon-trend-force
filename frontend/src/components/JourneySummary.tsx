@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { UI_LABELS, toStatusVariant } from "../config/constants";
 
 export interface JourneySummaryProps {
@@ -7,6 +8,16 @@ export interface JourneySummaryProps {
   distance?: number;
   risk?: string;
 }
+
+const stagger = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.06 } },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 18 } },
+};
 
 export function JourneySummary({
   routeName,
@@ -18,40 +29,45 @@ export function JourneySummary({
   if (routeName == null && totalTime == null && delay == null) return null;
 
   return (
-    <div className="journey-summary card">
+    <motion.div
+      className="journey-summary card"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: "spring", stiffness: 100, damping: 18 }}
+    >
       <h3>{UI_LABELS.JOURNEY_SUMMARY}</h3>
-      <div className="journey-summary-grid">
+      <motion.div className="journey-summary-grid" variants={stagger} initial="hidden" animate="visible">
         {routeName != null && (
-          <div className="journey-summary-item">
+          <motion.div className="journey-summary-item" variants={item}>
             <span className="journey-label">{UI_LABELS.RECOMMENDED_ROUTE}</span>
             <span className="journey-value">{routeName}</span>
-          </div>
+          </motion.div>
         )}
         {totalTime != null && (
-          <div className="journey-summary-item">
+          <motion.div className="journey-summary-item" variants={item}>
             <span className="journey-label">{UI_LABELS.TOTAL_DURATION}</span>
             <span className="journey-value">{totalTime} mins</span>
-          </div>
+          </motion.div>
         )}
         {delay != null && (
-          <div className="journey-summary-item">
+          <motion.div className="journey-summary-item" variants={item}>
             <span className="journey-label">{UI_LABELS.EXPECTED_DELAY}</span>
             <span className="journey-value">{delay} mins</span>
-          </div>
+          </motion.div>
         )}
         {distance != null && (
-          <div className="journey-summary-item">
+          <motion.div className="journey-summary-item" variants={item}>
             <span className="journey-label">{UI_LABELS.DISTANCE}</span>
             <span className="journey-value">{distance} km</span>
-          </div>
+          </motion.div>
         )}
         {risk != null && (
-          <div className="journey-summary-item">
+          <motion.div className="journey-summary-item" variants={item}>
             <span className="journey-label">{UI_LABELS.RISK}</span>
             <span className={`status-badge status-${toStatusVariant(risk)}`}>{risk}</span>
-          </div>
+          </motion.div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
