@@ -102,7 +102,6 @@ export function NavigationDashboard({
           <MetricCard
             label={UI_LABELS.PEAK_HOUR}
             value="Yes"
-            subtitle={UI_LABELS.PEAK_HOUR_CONTEXT}
           />
         )}
         {weatherImpactNote != null && (

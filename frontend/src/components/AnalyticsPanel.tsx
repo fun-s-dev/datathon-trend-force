@@ -1,12 +1,10 @@
 import {
   derivePlannerSummary,
   deriveNavigationSummary,
-  deriveRouteInsightBullets,
-  deriveRunSummaryBullets,
   PlannerSummary,
   NavigationSummary,
 } from "../analytics/deriveFromPrediction";
-import { UI_LABELS, ANALYTICS_TABLE_COLUMNS, DATA_NOT_AVAILABLE } from "../config/constants";
+import { UI_LABELS, ANALYTICS_TABLE_COLUMNS } from "../config/constants";
 
 interface AnalyticsPanelProps {
   prediction: Record<string, unknown>;
@@ -25,14 +23,6 @@ function RunLevelBlock({ run }: { run: PlannerSummary["run"] }) {
           <span className="analytics-value">{run.total_routes}</span>
         </div>
         <div className="analytics-item">
-          <span className="analytics-label">{UI_LABELS.FASTEST_ROUTE}</span>
-          <span className="analytics-value">{run.fastest_route_name || run.fastest_route_id}</span>
-        </div>
-        <div className="analytics-item">
-          <span className="analytics-label">{UI_LABELS.SAFEST_ROUTE}</span>
-          <span className="analytics-value">{run.safest_route_name || run.safest_route_id}</span>
-        </div>
-        <div className="analytics-item">
           <span className="analytics-label">{UI_LABELS.AVERAGE_DELAY}</span>
           <span className="analytics-value">{run.average_delay} mins</span>
         </div>
@@ -44,48 +34,31 @@ function RunLevelBlock({ run }: { run: PlannerSummary["run"] }) {
           <span className="analytics-label">{UI_LABELS.RISK_SPREAD}</span>
           <span className="analytics-value">{run.risk_spread_across_routes}</span>
         </div>
-        <div className="analytics-item">
-          <span className="analytics-label">{UI_LABELS.CONGESTION_CONSISTENCY}</span>
-          <span className="analytics-value">{run.congestion_consistency_indicator || DATA_NOT_AVAILABLE}</span>
-        </div>
       </div>
     </div>
   );
 }
 
-function InsightsBulletBlock({
-  run,
-  routes,
+function WhyRecommendedBlock({
+  summaries,
+  mode,
 }: {
-  run: PlannerSummary["run"];
-  routes: PlannerSummary["routes"];
+  summaries: PlannerSummary["summaries"];
+  mode: "planner" | "navigation";
 }) {
-  const runBullets = deriveRunSummaryBullets(run);
-  const routeBullets = deriveRouteInsightBullets(routes);
-  const hasContent = runBullets.length > 0 || routeBullets.length > 0;
+  const hasContent =
+    (summaries.why_recommended && summaries.why_recommended.length > 0) ||
+    (mode === "planner" &&
+      summaries.time_saved_vs_alternatives &&
+      summaries.time_saved_vs_alternatives.length > 0) ||
+    (summaries.congestion_consistency && summaries.congestion_consistency.length > 0);
   if (!hasContent) return null;
 
   return (
-    <div className="insights-bullets card">
-      <h4>{UI_LABELS.WHY_RECOMMENDED}</h4>
-      <ul className="insights-list">
-        {runBullets.map((text, i) => (
-          <li key={`run-${i}`}>{text}</li>
-        ))}
-        {routeBullets.map((text, i) => (
-          <li key={`route-${i}`}>{text}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function SummariesBlock({ summaries }: { summaries: PlannerSummary["summaries"] }) {
-  return (
-    <div className="analytics-summaries card">
+    <div className="analytics-why-recommended card">
       <h4>{UI_LABELS.WHY_RECOMMENDED}</h4>
       {summaries.why_recommended && <p className="analytics-summary-text">{summaries.why_recommended}</p>}
-      {summaries.time_saved_vs_alternatives && (
+      {mode === "planner" && summaries.time_saved_vs_alternatives && (
         <p className="analytics-summary-text">{summaries.time_saved_vs_alternatives}</p>
       )}
       {summaries.congestion_consistency && (
@@ -161,8 +134,7 @@ export function AnalyticsPanel({ prediction, mode }: AnalyticsPanelProps) {
     return (
       <div className="analytics-panel">
         <RunLevelBlock run={planner.run} />
-        <InsightsBulletBlock run={planner.run} routes={planner.routes} />
-        <SummariesBlock summaries={planner.summaries} />
+        <WhyRecommendedBlock summaries={planner.summaries} mode="planner" />
         <FlattenedTable rows={planner.flattened_table} />
       </div>
     );
@@ -171,8 +143,7 @@ export function AnalyticsPanel({ prediction, mode }: AnalyticsPanelProps) {
   return (
     <div className="analytics-panel">
       <NavigationBlock nav={nav} />
-      <InsightsBulletBlock run={planner.run} routes={planner.routes} />
-      <SummariesBlock summaries={planner.summaries} />
+      <WhyRecommendedBlock summaries={planner.summaries} mode="navigation" />
     </div>
   );
 }

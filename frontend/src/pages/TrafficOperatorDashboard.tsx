@@ -1,10 +1,9 @@
 import { AlertBanner } from "../components/AlertBanner";
-import { ExplainabilityBlock } from "../components/ExplainabilityBlock";
 import { AnalyticsPanel } from "../components/AnalyticsPanel";
 import { RouteCard } from "../components/RouteCard";
 import { MetricCard } from "../components/MetricCard";
 import { StatusBadge } from "../components/StatusBadge";
-import { UI_LABELS, FEATURE_FLAGS, EXPLANATION_TEMPLATES } from "../config/constants";
+import { UI_LABELS, FEATURE_FLAGS } from "../config/constants";
 
 export interface TrafficOperatorDashboardProps {
   routes: Record<string, unknown>[];
@@ -34,18 +33,6 @@ export function TrafficOperatorDashboard({
       )}
       <AlertBanner riskScore={riskScore} risk={recommended?.risk as string | undefined} />
 
-      {FEATURE_FLAGS.SHOW_RANKING_EXPLANATION && recommended != null && (
-        <ExplainabilityBlock
-          routeName={String(recommended.name ?? recommended.route ?? "")}
-          totalTime={Number(recommended.predicted_time ?? recommended.predicted_time_min ?? 0)}
-          base={Number(recommended.base_time_min ?? recommended.baseTime ?? recommended.duration_min ?? 0)}
-          delay={Number(recommended.predicted_delay ?? recommended.predictedDelay ?? recommended.predicted_delay_min ?? 0)}
-          peakHourFlag={peakHourFlag}
-          travelDay={travelDay}
-          weatherImpactNote={weatherImpactNote}
-        />
-      )}
-
       <div className="congestion-summary card">
         <h3>{UI_LABELS.CONGESTION_LEVEL}</h3>
         <div className="congestion-summary-content">
@@ -68,10 +55,7 @@ export function TrafficOperatorDashboard({
       )}
 
       {peakHourFlag && (
-        <div className="card metric-card-inline">
-          <span className="metric-label">{UI_LABELS.PEAK_HOUR_CONTEXT}</span>
-          <span className="metric-value-small">{EXPLANATION_TEMPLATES.PEAK_HOUR_NOTE}</span>
-        </div>
+        <MetricCard label={UI_LABELS.PEAK_HOUR} value="Yes" />
       )}
     </div>
   );

@@ -31,7 +31,7 @@ body {
   margin: 0;
   font-family: 'IBM Plex Serif', serif;
   min-height: 100vh;
-  background-image: url('./bg.jpeg');
+  background-image: url('./grey_bg.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
