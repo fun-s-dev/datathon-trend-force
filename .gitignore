@@ -32,6 +32,3 @@ desktop.ini
 *.exe
 *.so
 *.dylib
-
-# Models (regenerated via generate_models.py)
-backend/models/*.pkl
