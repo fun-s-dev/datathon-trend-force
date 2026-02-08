@@ -1,10 +1,12 @@
 """
 Feature engineering — build the feature vector expected by the trained model.
 All transformations MUST match what was used at training time.
+Optional inputs (vehicle_type, urgency_level, preferred_route_type) are accepted
+for future extensibility; the current model schema does not include them.
 """
 
 import math
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import pandas as pd
 from config.settings import DEFAULT_DENSITY, DEFAULT_LANES, DEFAULT_SIGNALS
@@ -33,6 +35,9 @@ def build_features(
     travel_time: str,
     travel_day: str,
     weather_severity: float,
+    vehicle_type: Optional[str] = None,
+    urgency_level: Optional[str] = None,
+    preferred_route_type: Optional[str] = None,
 ) -> pd.DataFrame:
     """
     Build the feature matrix as a pandas DataFrame for model inference.
@@ -47,6 +52,9 @@ def build_features(
         6  default_density
         7  default_lanes
         8  default_signals
+
+    Optional args (vehicle_type, urgency_level, preferred_route_type) are
+    accepted for future model extensions; not used in current schema.
     """
     # Define the exact feature names expected by the model
     FEATURE_NAMES = [

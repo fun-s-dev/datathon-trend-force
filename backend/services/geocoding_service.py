@@ -1,17 +1,15 @@
 """
 Geocoding service — Photon (OpenStreetMap-based, komoot).
-FREE, no API key required.
+FREE, no API key required. Config from settings — no hard-coded URLs.
 """
 
 from typing import Tuple
 import requests
 from fastapi import HTTPException
 
-_PHOTON_URL = "https://photon.komoot.io/api/"
-_TIMEOUT = 10  # seconds
+from config.settings import PHOTON_URL, PHOTON_TIMEOUT_SEC
 
 _HEADERS = {
-    # REQUIRED by Photon to avoid 403
     "User-Agent": "Urban-Traffic-Congestion-Intelligence/1.0 (college-project)"
 }
 
@@ -27,10 +25,10 @@ def geocode(place_name: str) -> Tuple[float, float]:
 
     try:
         resp = requests.get(
-            _PHOTON_URL,
+            PHOTON_URL.rstrip("/"),
             params=params,
-            headers=_HEADERS,   # 🔥 THIS FIXES 403
-            timeout=_TIMEOUT,
+            headers=_HEADERS,
+            timeout=PHOTON_TIMEOUT_SEC,
         )
         resp.raise_for_status()
     except requests.RequestException as exc:

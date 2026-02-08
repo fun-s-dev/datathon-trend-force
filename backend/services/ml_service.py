@@ -62,24 +62,19 @@ def _load_weather_encoder():
 
 # ── Public API ───────────────────────────────────────────────────────────────
 
-# Deterministic weather severity mapping — matches training-time encoding.
-# Used as the primary encoder to guarantee no unseen-label crashes.
-_WEATHER_DICT = {"Clear": 0, "Extreme": 1, "Fog": 2, "Rain": 3, "Snow": 4}
+from config.constants import WEATHER_SEVERITY_MAP
 
 
 def encode_weather(weather: str) -> float:
     """
     Convert the weather string into a numeric severity value.
 
-    Uses a deterministic mapping that matches the training-time label encoding.
-    Falls back to the .pkl encoder only if the dict lookup fails and the
-    encoder file is available (belt-and-suspenders approach).
+    Uses WEATHER_SEVERITY_MAP from config; falls back to .pkl encoder
+    for unexpected values if available.
     """
-    # Primary: deterministic dictionary (safe, no unseen-label crash)
-    if weather in _WEATHER_DICT:
-        return float(_WEATHER_DICT[weather])
+    if weather in WEATHER_SEVERITY_MAP:
+        return float(WEATHER_SEVERITY_MAP[weather])
 
-    # Fallback: try the pkl encoder for any unexpected value
     try:
         encoder = _load_weather_encoder()
         encoded = encoder.transform([weather])
@@ -88,11 +83,10 @@ def encode_weather(weather: str) -> float:
     except Exception:
         pass
 
-    # Last resort — unknown weather → HTTP 400
     raise HTTPException(
         status_code=400,
         detail=f"Unknown weather value: '{weather}'. "
-               f"Expected one of: {list(_WEATHER_DICT.keys())}",
+               f"Expected one of: {list(WEATHER_SEVERITY_MAP.keys())}",
     )
 
 

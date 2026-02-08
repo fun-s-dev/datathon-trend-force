@@ -1,6 +1,7 @@
 """
 Routing service — OSRM (Open Source Routing Machine).
 FREE public endpoint, no API key required.
+Config from settings — no hard-coded URLs or timeouts.
 """
 
 from typing import Any, Dict, List
@@ -8,8 +9,8 @@ from typing import Any, Dict, List
 import requests
 from fastapi import HTTPException
 
-_OSRM_BASE = "https://router.project-osrm.org"
-_TIMEOUT = 15  # seconds
+from config.settings import OSRM_BASE_URL, OSRM_TIMEOUT_SEC
+from config.constants import ROUTE_NAME_FALLBACK_PREFIX
 
 
 def fetch_routes(
@@ -33,9 +34,9 @@ def fetch_routes(
         HTTPException 502 — OSRM service failure
     """
 
-    # OSRM expects coordinates as lon,lat (note: longitude first)
+    base = OSRM_BASE_URL.rstrip("/")
     url = (
-        f"{_OSRM_BASE}/route/v1/driving/"
+        f"{base}/route/v1/driving/"
         f"{origin_lon},{origin_lat};{dest_lon},{dest_lat}"
     )
     params = {
@@ -45,7 +46,7 @@ def fetch_routes(
     }
 
     try:
-        resp = requests.get(url, params=params, timeout=_TIMEOUT)
+        resp = requests.get(url, params=params, timeout=OSRM_TIMEOUT_SEC)
         resp.raise_for_status()
     except requests.RequestException as exc:
         raise HTTPException(
@@ -74,10 +75,9 @@ def fetch_routes(
         coords = route["geometry"]["coordinates"]
         geometry = [[pt[1], pt[0]] for pt in coords]
 
-        # Build a human-readable name from the route legs or fall back to index
         legs = route.get("legs", [])
         summary = legs[0].get("summary", "") if legs else ""
-        route_name = summary if summary else f"Route {idx + 1}"
+        route_name = summary if summary else f"{ROUTE_NAME_FALLBACK_PREFIX}{idx + 1}"
 
         routes.append({
             "route_name": route_name,

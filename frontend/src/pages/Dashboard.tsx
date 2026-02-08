@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchPrediction, BASE_URL, PREDICTION_API } from "../services/api";
-import { RouteCard } from "../components/RouteCard";
-import { MetricCard } from "../components/MetricCard";
-import { StatusBadge } from "../components/StatusBadge";
+import { fetchPrediction } from "../services/api";
 import { LoaderSkeleton } from "../components/LoaderSkeleton";
 import { ErrorState } from "../components/ErrorState";
-
+import { NavigationDashboard } from "./NavigationDashboard";
+import { CityPlannerDashboard } from "./CityPlannerDashboard";
+import { TrafficOperatorDashboard } from "./TrafficOperatorDashboard";
+import { DASHBOARD_CONFIG, UI_LABELS } from "../config/constants";
+import { BASE_URL, PREDICTION_API } from "../services/api";
 
 type ViewState = "idle" | "loading" | "success" | "empty" | "error";
+
+const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const;
+
 
 export function Dashboard() {
   const [source, setSource] = useState("");
@@ -21,15 +25,18 @@ export function Dashboard() {
   const [travelHour, setTravelHour] = useState("");
   const [travelPeriod, setTravelPeriod] = useState("");
   const [weather, setWeather] = useState("");
-
-
+  const [urgencyLevel, setUrgencyLevel] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [activeView, setActiveView] = useState<(typeof DASHBOARD_CONFIG.ENABLED_VIEWS)[number]>(
+    DASHBOARD_CONFIG.DEFAULT_VIEW
+  );
 
   const isApiConfigured = Boolean(BASE_URL && PREDICTION_API);
 
   const handleSubmit = async () => {
     if (!isApiConfigured) {
       setState("error");
-      setError("API not configured. Set BASE_URL and PREDICTION_API in services/api.js");
+      setError(UI_LABELS.API_NOT_CONFIGURED);
       return;
     }
 
@@ -38,17 +45,18 @@ export function Dashboard() {
     setPrediction(null);
 
     try {
-      // Convert 12h hour+period to 24h HH:00 string
       let hour24 = parseInt(travelHour, 10) || 0;
       if (travelPeriod === "pm" && hour24 !== 12) hour24 += 12;
       if (travelPeriod === "am" && hour24 === 12) hour24 = 0;
       const travelTime = `${String(hour24).padStart(2, "0")}:00`;
 
-      const data = await fetchPrediction(source, destination, travelDay, travelTime, weather);
+      const options = urgencyLevel ? { urgency_level: urgencyLevel } : undefined;
+      const data = await fetchPrediction(source, destination, travelDay, travelTime, weather, options);
       setPrediction(data);
 
       const routes = Array.isArray(data?.routes) ? data.routes : [];
-      const hasMetrics = data?.congestionLevel ?? data?.riskScore ?? data?.confidence;
+      const hasMetrics =
+        data?.congestionLevel ?? data?.riskScore ?? data?.weatherImpactNote;
       if (routes.length === 0 && !hasMetrics) {
         setState("empty");
       } else {
@@ -56,7 +64,7 @@ export function Dashboard() {
       }
     } catch (err) {
       setState("error");
-      setError(err instanceof Error ? err.message : "Prediction failed");
+      setError(err instanceof Error ? err.message : UI_LABELS.PREDICTION_FAILED);
     }
   };
 
@@ -64,94 +72,119 @@ export function Dashboard() {
     prediction?.routes && Array.isArray(prediction.routes) ? prediction.routes : [];
   const congestionLevel = prediction?.congestionLevel as string | undefined;
   const riskScore = prediction?.riskScore as number | undefined;
-  const confidence = prediction?.confidence as string | number | undefined;
+  const peakHourFlag = prediction?.peakHourFlag as boolean | undefined;
+  const weatherImpactNote = prediction?.weatherImpactNote as string | undefined;
 
   return (
     <div className="page dashboard">
-      <section className="section-input card">
+      <section className="section-input card input-section-scrollable">
         <h2>Route Prediction</h2>
-        <div className="input-row">
+        <div className="input-grid">
           <div className="input-group">
-            <label>Source location</label>
+            <label>{UI_LABELS.SOURCE}</label>
             <input
               type="text"
-              placeholder="Enter source location"
+              placeholder={UI_LABELS.PLACEHOLDER_SOURCE}
               value={source}
               onChange={(e) => setSource(e.target.value)}
               disabled={state === "loading"}
             />
           </div>
           <div className="input-group">
-            <label>Destination location</label>
+            <label>{UI_LABELS.DESTINATION}</label>
             <input
               type="text"
-              placeholder="Enter destination location"
+              placeholder={UI_LABELS.PLACEHOLDER_DESTINATION}
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
               disabled={state === "loading"}
             />
           </div>
-        </div>
-        <div className="time-selector">
-          <label>Travel Day</label>
+          <div className="input-row-inline">
+            <div className="time-selector">
+              <label>{UI_LABELS.TRAVEL_DAY}</label>
+              <select
+                value={travelDay}
+                onChange={(e) => setTravelDay(e.target.value)}
+                disabled={state === "loading"}
+              >
+                <option value="">{UI_LABELS.PLACEHOLDER_DAY}</option>
+                {DAYS.map((d) => (
+                  <option key={d} value={d}>
+                    {d.charAt(0).toUpperCase() + d.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="time-selector">
+              <label>{UI_LABELS.TRAVEL_TIME}</label>
+              <div className="time-row">
+                <select
+                  value={travelHour}
+                  onChange={(e) => setTravelHour(e.target.value)}
+                  disabled={state === "loading"}
+                >
+                  <option value="">{UI_LABELS.PLACEHOLDER_HOUR}</option>
+                  {[...Array(12)].map((_, i) => (
+                    <option key={i + 1} value={i + 1}>
+                      {i + 1}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={travelPeriod}
+                  onChange={(e) => setTravelPeriod(e.target.value)}
+                  disabled={state === "loading"}
+                >
+                  <option value="">{UI_LABELS.PLACEHOLDER_AMPM}</option>
+                  <option value="am">AM</option>
+                  <option value="pm">PM</option>
+                </select>
+              </div>
+            </div>
+            <div className="time-selector">
+              <label>{UI_LABELS.WEATHER}</label>
+              <select
+                value={weather}
+                onChange={(e) => setWeather(e.target.value)}
+                disabled={state === "loading"}
+              >
+                <option value="">{UI_LABELS.PLACEHOLDER_WEATHER}</option>
+                <option value="Clear">Clear</option>
+                <option value="Fog">Fog</option>
+                <option value="Rain">Rain</option>
+                <option value="Snow">Snow</option>
+                <option value="Extreme">Extreme</option>
+              </select>
+            </div>
+          </div>
 
-          <select
-            value={travelDay}
-            onChange={(e) => setTravelDay(e.target.value)}
-            disabled={state === "loading"}
-          >
-            <option value="">Select a day</option>
-            <option value="monday">Monday</option>
-            <option value="tuesday">Tuesday</option>
-            <option value="wednesday">Wednesday</option>
-            <option value="thursday">Thursday</option>
-            <option value="friday">Friday</option>
-            <option value="saturday">Saturday</option>
-            <option value="sunday">Sunday</option>
-          </select>
-        </div>
-        <div className="time-selector">
-  <label>Time of Travel</label>
-
-  <div style={{ display: "flex", gap: "0.75rem" }}>
-    <select
-      value={travelHour}
-      onChange={(e) => setTravelHour(e.target.value)}
-      disabled={state === "loading"}
-    >
-      <option value="">Hour</option>
-      {[...Array(12)].map((_, i) => (
-        <option key={i + 1} value={i + 1}>
-          {i + 1}
-        </option>
-      ))}
-    </select>
-
-    <select
-      value={travelPeriod}
-      onChange={(e) => setTravelPeriod(e.target.value)}
-      disabled={state === "loading"}
-    >
-      <option value="">AM/PM</option>
-      <option value="am">AM</option>
-      <option value="pm">PM</option>
-    </select>
-  </div>
-</div>
-        <div className="time-selector">
-          <label>Weather Condition</label>
-          <select
-            value={weather}
-            onChange={(e) => setWeather(e.target.value)}
-            disabled={state === "loading"}
-          >
-            <option value="">Select weather</option>
-            <option value="Clear">Clear</option>
-            <option value="Fog">Fog</option>
-            <option value="Rain">Rain</option>
-            <option value="Snow">Snow</option>
-            <option value="Extreme">Extreme</option>
-          </select>
+          <div className="advanced-toggle">
+            <button
+              type="button"
+              className="advanced-btn"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+            >
+              {showAdvanced ? "−" : "+"} {UI_LABELS.ADVANCED_OPTIONS}
+            </button>
+          </div>
+          {showAdvanced && (
+            <div className="advanced-section">
+              <div className="input-group">
+                <label>{UI_LABELS.URGENCY_LEVEL}</label>
+                <select
+                  value={urgencyLevel}
+                  onChange={(e) => setUrgencyLevel(e.target.value)}
+                  disabled={state === "loading"}
+                >
+                  <option value="">{UI_LABELS.PLACEHOLDER_URGENCY_DEFAULT}</option>
+                  <option value="low">Low</option>
+                  <option value="normal">Normal</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+            </div>
+          )}
         </div>
 
         <button
@@ -173,7 +206,7 @@ export function Dashboard() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <p className="idle-message">Enter route details and click Predict</p>
+            <p className="idle-message">{UI_LABELS.IDLE_MESSAGE}</p>
           </motion.section>
         )}
 
@@ -197,7 +230,7 @@ export function Dashboard() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <p className="empty-message">Model not trained yet</p>
+            <p className="empty-message">{UI_LABELS.EMPTY_MESSAGE}</p>
           </motion.section>
         )}
 
@@ -221,33 +254,59 @@ export function Dashboard() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {routes.length > 0 && (
-              <div className="routes-section">
-                <h3>Routes</h3>
-                <div className="route-cards">
-                  {routes.map((route: Record<string, unknown>, i: number) => (
-                    <RouteCard key={String(route?.id ?? i)} route={route} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="metrics-grid">
-              {congestionLevel && (
-                <div className="card metric-card-inline">
-                  <span className="metric-label">Congestion level</span>
-                  <StatusBadge level={congestionLevel} />
-                </div>
-              )}
-              <MetricCard label="Risk score" value={riskScore != null ? `${riskScore}%` : undefined} />
-              <MetricCard label="Confidence" value={confidence != null ? String(confidence) : undefined} />
+            <div className="dashboard-selector">
+              {DASHBOARD_CONFIG.ENABLED_VIEWS.map((view) => (
+                <button
+                  key={view}
+                  type="button"
+                  className={`dashboard-tab ${activeView === view ? "active" : ""}`}
+                  onClick={() => setActiveView(view)}
+                >
+                  {DASHBOARD_CONFIG.VIEW_LABELS[view] ?? view}
+                </button>
+              ))}
             </div>
+
+            {activeView === "navigation" && (
+              <NavigationDashboard
+                routes={routes}
+                prediction={prediction ?? {}}
+                congestionLevel={congestionLevel}
+                riskScore={riskScore}
+                peakHourFlag={peakHourFlag}
+                weatherImpactNote={weatherImpactNote}
+              />
+            )}
+            {activeView === "planner" && (
+              <CityPlannerDashboard
+                routes={routes}
+                prediction={prediction ?? {}}
+                congestionLevel={congestionLevel}
+                riskScore={riskScore}
+                peakHourFlag={peakHourFlag}
+                weatherImpactNote={weatherImpactNote}
+                travelDay={travelDay}
+              />
+            )}
+            {activeView === "operator" && (
+              <TrafficOperatorDashboard
+                routes={routes}
+                prediction={prediction ?? {}}
+                congestionLevel={congestionLevel}
+                riskScore={riskScore}
+                peakHourFlag={peakHourFlag}
+                weatherImpactNote={weatherImpactNote}
+                travelDay={travelDay}
+              />
+            )}
           </motion.section>
         )}
       </AnimatePresence>
 
       <nav className="page-nav">
-        <Link to="/report-incident" className="nav-link">Report Incident</Link>
+        <Link to="/report-incident" className="nav-link">
+          Report Incident
+        </Link>
       </nav>
     </div>
   );
