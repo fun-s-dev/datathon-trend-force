@@ -8,7 +8,7 @@ A full-stack, ML-powered traffic prediction platform that forecasts route delays
 
 Urban traffic congestion costs billions of hours and dollars annually. Commuters lack reliable tools that combine **real-time routing**, **weather conditions**, and **time-of-day patterns** into a single actionable prediction. Existing navigation apps show current conditions but rarely forecast delays before you leave.
 
-This project tackles the problem by delivering **pre-trip delay predictions** powered by machine learning, giving users the ability to compare routes, assess risk, and plan smarter — all from a single dashboard.
+This project tackles the problem by delivering **pre-trip delay predictions** powered by machine learning, giving users the ability to compare routes, assess risk, and plan smarter - all from a single dashboard.
 
 ---
 
@@ -18,7 +18,7 @@ The platform accepts a **source**, **destination**, **travel day**, **time**, an
 
 1. **Geocodes** the locations using Photon (OpenStreetMap-based, no API key required)
 2. **Fetches alternative routes** via OSRM (Open Source Routing Machine)
-3. **Engineers features** — cyclic hour encoding, weekend flags, weather severity, route distance/duration
+3. **Engineers features** - cyclic hour encoding, weekend flags, weather severity, route distance/duration
 4. **Runs ML inference** using a pre-trained Gradient Boosting model to predict delay per route
 5. **Ranks routes** by total predicted travel time and returns congestion levels, risk scores, peak-hour flags, and weather impact notes
 
@@ -28,21 +28,21 @@ The frontend presents this through **three dashboard views** tailored to differe
 
 ## Key Features
 
-- **Multi-Route Comparison** — Up to 3 alternative routes ranked by predicted total time
-- **Delay Prediction** — ML-based per-route delay forecast using distance, time, day, and weather features
-- **Risk Scoring** — 0–100 composite risk score combining delay severity and weather impact
-- **Congestion Classification** — Light / Moderate / Heavy congestion labels per route
-- **Peak Hour Detection** — Flags travel during morning (7–9 AM) and evening (5–7 PM) peak windows
-- **Weather Impact Notes** — Context-aware descriptions for Clear, Fog, Rain, Snow, and Extreme conditions
-- **Interactive Route Map** — Leaflet-based map rendering route geometries on OpenStreetMap tiles
+- **Multi-Route Comparison** - Up to 3 alternative routes ranked by predicted total time
+- **Delay Prediction** - ML-based per-route delay forecast using distance, time, day, and weather features
+- **Risk Scoring** - 0–100 composite risk score combining delay severity and weather impact
+- **Congestion Classification** - Light / Moderate / Heavy congestion labels per route
+- **Peak Hour Detection** - Flags travel during morning (7–9 AM) and evening (5–7 PM) peak windows
+- **Weather Impact Notes** - Context-aware descriptions for Clear, Fog, Rain, Snow, and Extreme conditions
+- **Interactive Route Map** - Leaflet-based map rendering route geometries on OpenStreetMap tiles
 - **Three Dashboard Views**:
-  - **Navigation** — Commuter-focused with route cards, journey summary, and map
-  - **City Planner** — Aggregated metrics, context rows, and analytics panels
-  - **Traffic Operator** — Congestion summaries, risk dashboards, and alert banners
-- **Animated UI** — Framer Motion spring animations, staggered transitions, and a traffic-light loading state
-- **Glass Morphism Design** — Dark theme with backdrop-blur cards, blue accent glow, and futuristic dropdown styling
-- **Fully Responsive** — Adapts to mobile, tablet, and desktop viewports
-- **No API Keys Required** — Uses entirely free services (Photon geocoding + OSRM routing)
+  - **Navigation** - Commuter-focused with route cards, journey summary, and map
+  - **City Planner** - Aggregated metrics, context rows, and analytics panels
+  - **Traffic Operator** - Congestion summaries, risk dashboards, and alert banners
+- **Animated UI** - Framer Motion spring animations, staggered transitions, and a traffic-light loading state
+- **Glass Morphism Design** - Dark theme with backdrop-blur cards, blue accent glow, and futuristic dropdown styling
+- **Fully Responsive** - Adapts to mobile, tablet, and desktop viewports
+- **No API Keys Required** - Uses entirely free services (Photon geocoding + OSRM routing)
 
 ---
 
@@ -74,11 +74,11 @@ The frontend presents this through **three dashboard views** tailored to differe
         │
         ▼
 ┌───────────────────────────────────────────────────────────┐
-│                    BACKEND (FastAPI)                       │
+│                    BACKEND (FastAPI)                      │
 │                                                           │
-│  ┌─────────────┐   ┌──────────────┐   ┌──────────────┐   │
-│  │  Geocoding  │──▶│   Routing    │──▶│   Feature    │   │
-│  │  (Photon)   │   │   (OSRM)    │   │ Engineering  │   │
+│  ┌─────────────┐   ┌──────────────┐   ┌──────────────┐    │
+│  │  Geocoding  │──▶│   Routing    │──▶│   Feature        │
+│  │  (Photon)   │   │   (OSRM)    │   │ Engineering  │     │
 │  └─────────────┘   └──────────────┘   └──────┬───────┘   │
 │                                              │           │
 │                                   ┌──────────▼────────┐  │
@@ -200,20 +200,20 @@ datathon-trend-force/
 
 ## Future Enhancements
 
-- **Real-Time Traffic Data** — Integrate live traffic feeds for dynamic delay adjustments
-- **Historical Trend Analysis** — Store and visualize delay trends over time
-- **User Accounts & Saved Routes** — Personalized route preferences and trip history
-- **Push Notifications** — Alert users when predicted delays exceed thresholds
-- **Multi-Modal Transport** — Extend predictions to public transit, cycling, and walking
-- **Advanced ML Models** — Train on larger datasets with deep learning (LSTM / Transformer) for temporal patterns
-- **Incident Reporting Pipeline** — Process reported incidents to dynamically adjust predictions
-- **Heatmap Overlays** — Visualize congestion density across city regions on the map
-- **Accessibility Improvements** — Full ARIA compliance and keyboard navigation support
+- **Real-Time Traffic Data** - Integrate live traffic feeds for dynamic delay adjustments
+- **Historical Trend Analysis** - Store and visualize delay trends over time
+- **User Accounts & Saved Routes** - Personalized route preferences and trip history
+- **Push Notifications** - Alert users when predicted delays exceed thresholds
+- **Multi-Modal Transport** - Extend predictions to public transit, cycling, and walking
+- **Advanced ML Models** - Train on larger datasets with deep learning (LSTM / Transformer) for temporal patterns
+- **Incident Reporting Pipeline** - Process reported incidents to dynamically adjust predictions
+- **Heatmap Overlays** - Visualize congestion density across city regions on the map
+- **Accessibility Improvements** - Full ARIA compliance and keyboard navigation support
 
 ---
 
 ## Conclusion
 
-**Urban Traffic Congestion Intelligence** demonstrates how machine learning and open geospatial services can be combined into a practical, end-to-end traffic prediction platform — without requiring paid APIs or proprietary data. The multi-persona dashboard design makes the same prediction data actionable for commuters choosing a route, city planners analyzing congestion patterns, and traffic operators monitoring risk in real time.
+**Urban Traffic Congestion Intelligence** demonstrates how machine learning and open geospatial services can be combined into a practical, end-to-end traffic prediction platform - without requiring paid APIs or proprietary data. The multi-persona dashboard design makes the same prediction data actionable for commuters choosing a route, city planners analyzing congestion patterns, and traffic operators monitoring risk in real time.
 
 Built for the datathon by **Team Trend Force**.
