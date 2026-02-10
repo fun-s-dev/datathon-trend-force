@@ -1,6 +1,6 @@
 # Urban Traffic Congestion Intelligence
 
-A full-stack, ML-powered traffic prediction platform that forecasts route delays, congestion levels, and risk scores in real time — helping commuters, city planners, and traffic operators make smarter travel decisions.
+A full-stack, ML-powered traffic prediction platform that forecasts route delays, congestion levels, and risk scores in real time - helping commuters, city planners, and traffic operators make smarter travel decisions.
 
 ---
 
